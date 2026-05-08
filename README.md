@@ -11,7 +11,7 @@ This project is part of the **Research Methodology** coursework at Bina Nusantar
 3. Stanislaus Alva Jufinto (2802473214)
 
 ## 📊 Dataset
-The dataset used in this project is the **[Doctors' Handwritten Prescription BD Dataset](https://www.kaggle.com/datasets/mamun1113/doctors-handwritten-prescription-bd-dataset)** from Kaggle[cite: 1, 5]. It contains handwritten drug names with 78 different classes (medicine names). 
+The dataset used in this project is the **[Doctors' Handwritten Prescription BD Dataset](https://www.kaggle.com/datasets/mamun1113/doctors-handwritten-prescription-bd-dataset)** from Kaggle. It contains handwritten drug names with 78 different classes (medicine names). 
 
 *Note: Due to file size limitations, the dataset is not included in this repository. Please download it from Kaggle and place it in the `dataset/raw/` directory.*
 

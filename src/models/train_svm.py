@@ -2,6 +2,7 @@ import time
 from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
+from sklearn.preprocessing import StandardScaler  # <-- TAMBAHAN IMPORT SCALER
 from src.utils.data_loader import get_train_test_split
 
 def run_svm_experiments():
@@ -24,14 +25,23 @@ def run_svm_experiments():
         # 1. Load & Split Data (80:20) secara on-the-fly
         X_train, X_test, y_train, y_test = get_train_test_split(processed_data_dir, feature)
         
+        # 2. Standardisasi Skala Fitur (TAMBAHAN BARU)
+        if feature != 'HOG':
+            print("[*] Melakukan Standardisasi Skala Fitur (StandardScaler)...")
+            scaler = StandardScaler()
+            X_train = scaler.fit_transform(X_train)
+            X_test = scaler.transform(X_test)
+        else:
+            print("[*] Fitur HOG melewati StandardScaler (sudah ternormalisasi secara internal)...")
+        
         start_time = time.time()
         
-        # 2. Inisialisasi dan Tuning Hyperparameter
+        # 3. Inisialisasi dan Tuning Hyperparameter
         print(f"[*] Sedang mencari parameter terbaik dan melatih model...")
         svm_grid = GridSearchCV(SVC(random_state=42), svm_param_grid, cv=5, scoring='f1_macro', n_jobs=-1)
         svm_grid.fit(X_train, y_train)
         
-        # 3. Prediksi dan Evaluasi
+        # 4. Prediksi dan Evaluasi
         svm_preds = svm_grid.predict(X_test)
         training_time = time.time() - start_time
         
