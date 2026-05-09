@@ -33,7 +33,7 @@ def run_fusion_experiments():
 
     # Sedikit melebarkan pencarian C pada SVM untuk potensi akurasi maksimal
     models = {
-        'SVM': (SVC(random_state=42), {'C': [0.1, 1, 10, 100], 'kernel': ['linear', 'rbf']}),
+        'SVM': (SVC(random_state=42), {'C': [0.1, 1, 10, 100], 'kernel': ['rbf']}),
         'KNN': (KNeighborsClassifier(), {'n_neighbors': [3, 5, 7], 'weights': ['uniform', 'distance']}),
         'Random Forest': (RandomForestClassifier(random_state=42), {'n_estimators': [50, 100, 200], 'max_depth': [None, 20]})
     }

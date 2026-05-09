@@ -14,7 +14,7 @@ def run_svm_experiments():
     # Grid parameter untuk SVM sesuai metodologi paper
     svm_param_grid = {
         'C': [0.1, 1, 10], 
-        'kernel': ['linear', 'rbf']
+        'kernel': ['rbf']
     }
 
     processed_data_dir = "dataset/processed"
