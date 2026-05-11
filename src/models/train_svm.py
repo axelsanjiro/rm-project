@@ -1,55 +1,49 @@
 import time
 from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
-from sklearn.preprocessing import StandardScaler  # <-- TAMBAHAN IMPORT SCALER
+from sklearn.metrics import accuracy_score, f1_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 from src.utils.data_loader import get_train_test_split
 
 def run_svm_experiments():
-    print("=== Memulai Eksperimen Klasifikasi SVM ===")
-    
-    # Zernike di-skip sementara sesuai kesepakatan
-    feature_methods = ['HOG', 'LBP', 'Gabor']
-    
-    # Grid parameter untuk SVM sesuai metodologi paper
-    svm_param_grid = {
-        'C': [0.1, 1, 10], 
-        'kernel': ['rbf']
-    }
-
+    print("=== Eksperimen SVM untuk Fitur Individu + PCA ===")
     processed_data_dir = "dataset/processed"
+    
+    # Tambahkan 'Zernike' ke dalam list ini nanti jika kodenya sudah digabung oleh temanmu
+    features_to_test = ['HOG', 'LBP', 'Gabor', 'Zernike']  # <-- TAMBAHAN FITUR ZERNIKE
+    
+    for feat in features_to_test:
+        print(f"\n[*] Mengekstraksi fitur {feat}...")
+        X_train, X_test, y_train, y_test = get_train_test_split(processed_data_dir, feat)
+        
+        # Standardisasi & PCA
+        scaler = StandardScaler()
+        X_train = scaler.fit_transform(X_train)
+        X_test = scaler.transform(X_test)
+        
+        pca = PCA(n_components=0.95, random_state=42)
+        X_train = pca.fit_transform(X_train)
+        X_test = pca.transform(X_test)
+        
+        print(f"[*] Dimensi {feat} setelah PCA: {X_train.shape[1]} komponen")
 
-    for feature in feature_methods:
-        print(f"\n--- Melatih SVM menggunakan fitur: {feature} ---")
-        
-        # 1. Load & Split Data (80:20) secara on-the-fly
-        X_train, X_test, y_train, y_test = get_train_test_split(processed_data_dir, feature)
-        
-        # 2. Standardisasi Skala Fitur (TAMBAHAN BARU)
-        if feature != 'HOG':
-            print("[*] Melakukan Standardisasi Skala Fitur (StandardScaler)...")
-            scaler = StandardScaler()
-            X_train = scaler.fit_transform(X_train)
-            X_test = scaler.transform(X_test)
-        else:
-            print("[*] Fitur HOG melewati StandardScaler (sudah ternormalisasi secara internal)...")
-        
+        model = SVC(random_state=42)
+        param_grid = {'C': [0.1, 1, 10, 100], 'kernel': ['rbf']}
+
+        print(f"--- Melatih SVM dengan {feat} ---")
         start_time = time.time()
         
-        # 3. Inisialisasi dan Tuning Hyperparameter
-        print(f"[*] Sedang mencari parameter terbaik dan melatih model...")
-        svm_grid = GridSearchCV(SVC(random_state=42), svm_param_grid, cv=5, scoring='f1_macro', n_jobs=-1)
-        svm_grid.fit(X_train, y_train)
+        grid = GridSearchCV(model, param_grid, cv=5, scoring='f1_macro', n_jobs=-1)
+        grid.fit(X_train, y_train)
         
-        # 4. Prediksi dan Evaluasi
-        svm_preds = svm_grid.predict(X_test)
+        preds = grid.predict(X_test)
         training_time = time.time() - start_time
         
-        print(f"[{feature}] Best Params  : {svm_grid.best_params_}")
-        print(f"[{feature}] Accuracy     : {accuracy_score(y_test, svm_preds):.4f}")
-        print(f"[{feature}] F1-Macro     : {f1_score(y_test, svm_preds, average='macro'):.4f}")
-        print(f"[{feature}] Waktu Proses : {training_time:.2f} detik")
-        print(f"[{feature}] Confusion Matrix:\n{confusion_matrix(y_test, svm_preds)}\n")
+        print(f"[SVM - {feat}] Best Params  : {grid.best_params_}")
+        print(f"[SVM - {feat}] Accuracy     : {accuracy_score(y_test, preds):.4f}")
+        print(f"[SVM - {feat}] F1-Macro     : {f1_score(y_test, preds, average='macro'):.4f}")
+        print(f"[SVM - {feat}] Waktu Proses : {training_time:.2f} detik")
 
 if __name__ == "__main__":
     run_svm_experiments()
